@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/samuel/go-zookeeper/zk"
-	"os"
-	"strings"
 	"time"
+
+	"github.com/samuel/go-zookeeper/zk"
 )
 
 func must(err error) {
@@ -14,10 +13,10 @@ func must(err error) {
 	}
 }
 
+var servers = []string{"localhost:2181", "localhost:2182", "localhost:2183"}
+
 func connect() *zk.Conn {
-	zksStr := os.Getenv("ZOOKEEPER_SERVERS")
-	zks := strings.Split(zksStr, ",")
-	conn, _, err := zk.Connect(zks, time.Second)
+	conn, _, err := zk.Connect(servers, time.Second)
 	must(err)
 	return conn
 }
