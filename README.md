@@ -12,6 +12,9 @@ NOTE (ctopher78): I've edited this forked repo to use docker instead of a vagran
 $ docker-compose -f stack.yml up
 ```
 
+More information about the docker zookeeper image can be found here:
+https://docs.docker.com/samples/library/zookeeper/#start-a-zookeeper-server-instance
+
 `ex-*.go` files are example programs running with `go run` as above.
 
 `sim-*.txt` are failure simulation notes, showing how to run basic
