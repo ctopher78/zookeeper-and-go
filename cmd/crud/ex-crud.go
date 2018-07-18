@@ -2,27 +2,13 @@ package main
 
 import (
 	"fmt"
-	"time"
 
+	"github.com/ctopher78/zookeeper-and-go/internal/zookeeper"
 	"github.com/samuel/go-zookeeper/zk"
 )
 
-func must(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-var servers = []string{"localhost:2181", "localhost:2182", "localhost:2183"}
-
-func connect() *zk.Conn {
-	conn, _, err := zk.Connect(servers, time.Second)
-	must(err)
-	return conn
-}
-
 func main() {
-	conn := connect()
+	conn := zookeeper.Connect()
 	defer conn.Close()
 
 	flags := int32(0)
@@ -47,4 +33,10 @@ func main() {
 	exists, stat, err := conn.Exists("/01")
 	must(err)
 	fmt.Printf("exists: %+v %+v\n", exists, stat)
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
