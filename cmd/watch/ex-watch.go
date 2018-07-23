@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/samuel/go-zookeeper/zk"
-	"os"
-	"strings"
 	"time"
+
+	"github.com/ctopher78/zookeeper-and-go/internal/zookeeper"
+	"github.com/samuel/go-zookeeper/zk"
 )
 
 func must(err error) {
@@ -14,32 +14,26 @@ func must(err error) {
 	}
 }
 
-func connect() *zk.Conn {
-	zksStr := os.Getenv("ZOOKEEPER_SERVERS")
-	zks := strings.Split(zksStr, ",")
-	conn, _, err := zk.Connect(zks, time.Second)
-	must(err)
-	return conn
-}
-
 func main() {
-	conn1 := connect()
+	conn1 := zookeeper.Connect()
 	defer conn1.Close()
+	conn2 := zookeeper.Connect()
+	defer conn2.Close()
 
-	flags := int32(zk.FlagEphemeral)
+	flags := int32(0)
 	acl := zk.WorldACL(zk.PermAll)
 
-	found, _, ech, err := conn1.ExistsW("/watch")
-	must(err)
-	fmt.Printf("found: %t\n", found)
+	conn1.Delete("/watch/child1", int32(0))
+	conn1.Create("/watch", []byte(""), flags, acl)
 
-	conn2 := connect()
+	found, _, ech, err := conn1.ChildrenW("/watch")
 	must(err)
+	fmt.Printf("found: %v\n", found)
 
 	go func() {
 		time.Sleep(time.Second * 3)
 		fmt.Println("creating znode")
-		_, err = conn2.Create("/watch", []byte("here"), flags, acl)
+		_, err = conn2.Create("/watch/child1", []byte("here"), flags, acl)
 		must(err)
 	}()
 
@@ -47,7 +41,7 @@ func main() {
 	fmt.Println("watch fired")
 	must(evt.Err)
 
-	found, _, err = conn1.Exists("/watch")
+	found, _, err = conn1.Children("/watch")
 	must(err)
-	fmt.Printf("found: %t\n", found)
+	fmt.Printf("found: %v\n", found)
 }
