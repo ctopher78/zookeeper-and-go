@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/ctopher78/zookeeper-and-go/internal/zookeeper"
 	"github.com/samuel/go-zookeeper/zk"
+)
+
+const (
+	ZKQUEUE = "/_QUEUE_"
 )
 
 func must(err error) {
@@ -17,36 +20,24 @@ func must(err error) {
 func main() {
 	conn1 := zookeeper.Connect()
 	defer conn1.Close()
-	conn2 := zookeeper.Connect()
-	defer conn2.Close()
 
 	flags := int32(0)
 	acl := zk.WorldACL(zk.PermAll)
+	// conn1.Delete("/watch/child0000000028", int32(0))
+	conn1.Create(ZKQUEUE, []byte(""), flags, acl)
 
-	conn1.Delete("/watch/child1", int32(0))
-	conn1.Create("/watch", []byte(""), flags, acl)
-
-	found, _, ech, err := conn1.ChildrenW("/watch")
+	found, _, ech, err := conn1.ChildrenW(ZKQUEUE)
 	must(err)
 	fmt.Printf("found: %v\n", found)
-
-	go func() {
-		time.Sleep(time.Second * 3)
-		fmt.Println("creating znode")
-		_, err = conn2.Create("/watch/child1", []byte("some important data"), flags, acl)
-		must(err)
-	}()
 
 	evt := <-ech
 	fmt.Println("watch fired")
 	must(evt.Err)
 
-	fmt.Println("Path: ", evt.)
-
-	found, _, err = conn1.Children("/watch")
+	found, _, err = conn1.Children(ZKQUEUE)
 	must(err)
 	fmt.Printf("found: %v\n", found)
-	data, _, err := conn1.Get("/watch/" + found[0])
+	data, _, err := conn1.Get(ZKQUEUE + "/" + found[0])
 	must(err)
 	fmt.Printf("Data: %v\n", string(data))
 }

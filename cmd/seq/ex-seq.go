@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/samuel/go-zookeeper/zk"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/samuel/go-zookeeper/zk"
 )
 
 func must(err error) {
