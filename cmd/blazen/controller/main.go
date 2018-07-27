@@ -17,6 +17,8 @@ func must(err error) {
 	}
 }
 
+var job = `{"cmd": ping`
+
 func main() {
 	conn2 := zookeeper.Connect()
 	defer conn2.Close()
